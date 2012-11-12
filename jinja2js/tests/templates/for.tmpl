@@ -1,0 +1,7 @@
+{% set x=[1,2,3] %}
+{% set y=[1,2,3] %}
+{% for a in x %}
+	{% for b in y %}
+		{{loop.index}}{{a}}={{b}}
+	{% endfor %}
+{% endfor %}
