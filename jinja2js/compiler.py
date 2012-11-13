@@ -56,10 +56,16 @@ unoptimize_before_dead_code = bool(unoptimize_before_dead_code().func_closure)
 def generate(node, environment, name, filename, stream=None,
              defer_init=False):
     """Generate the python source for a node tree."""
-    if not isinstance(node, nodes.Template):
-        raise TypeError('Can\'t compile non template nodes')
+    # if not isinstance(node, nodes.Template):
+    #     raise TypeError('Can\'t compile non template nodes')
     generator = CodeGenerator(environment, name, filename, stream, defer_init)
-    generator.visit(node)
+    # generator.visit(node)
+    if isinstance(node, nodes.Template):
+        generator.visit(node)
+    else:
+        eval_ctx = EvalContext(environment, name)
+        frame = Frame(eval_ctx)
+        generator.visit(node, frame=frame)
     if stream is None:
         return generator.stream.getvalue()
 
@@ -816,9 +822,11 @@ class CodeGenerator(NodeVisitor):
                     self.writeline('import %s as %s' % (imp, alias))
 
         # add the load name
-        self.writeline('(function(_super) ')
+        self.writeline('(function() ')
         self.indent()
-        self.writeline('_super.register(%r, Template);' % JSVar(self.name))
+        self.writeline('Jinja2.extends(Template, Jinja2.Template);' % JSVar(self.name))
+        if self.name:
+            self.writeline('Jinja2.registerTemplate(%r, Template);' % JSVar(self.name))
         self.writeline('function Template() {return Template.__super__.constructor.apply(this, arguments);};')
         # self.indent()
         # self.writeline('environment = environment;')
@@ -876,7 +884,7 @@ class CodeGenerator(NodeVisitor):
 
         self.writeline('return Template;')
         self.outdent()
-        self.write(')(Jinja2.Template)')
+        self.write(')()')
         # self.writeline('blocks = {%s}' % ', '.join('%r: block_%s' % (x, x)
         #                                            for x in self.blocks),
         #                extra=1)
@@ -928,7 +936,7 @@ class CodeGenerator(NodeVisitor):
             if self.has_known_extends:
                 raise CompilerExit()
 
-        self.writeline('var parent_template = environment.get(', node)
+        self.writeline('var parent_template = environment.getTemplate(', node)
         self.visit(node.template, frame)
         self.write(', %r);' % JSVar(self.name))
         self.writeline('for (name in parent_template.blocks) ')
@@ -1586,11 +1594,11 @@ class CodeGenerator(NodeVisitor):
             write_expr2()
             self.write(')')
         else:
-            self.write('(')
-            self.visit(node.expr1, frame)
-            self.write(' if ')
+            self.write('((')
             self.visit(node.test, frame)
-            self.write(' else ')
+            self.write(')?')
+            self.visit(node.expr1, frame)
+            self.write(':')
             write_expr2()
             self.write(')')
 

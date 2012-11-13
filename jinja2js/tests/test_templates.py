@@ -5,7 +5,7 @@ import os
 # sys.path.append(path)
 import jinja2
 import jinja2js
-from jinja2js.generate import generate
+from jinja2js.generate import generate, lib
 from nose import with_setup
 
 
@@ -20,6 +20,7 @@ from pyv8 import PyV8
 
 TEMPLATE_FOLDER = 'templates/'
 env = jinja2.Environment(loader = jinja2.FileSystemLoader(TEMPLATE_FOLDER))
+env.add_extension('jinja2js.extension.Jinja2JsExtension')
 
 class Global(PyV8.JSClass): 
   def log(self,*args):
@@ -30,19 +31,29 @@ class Global(PyV8.JSClass):
 ctx = PyV8.JSContext(Global())
 ctx.enter()
 
-runtime = os.path.join(os.path.dirname(__file__),"../../jinja2js/lib/runtime.js")
-with open(runtime, 'r') as f:
-    ctx.eval(f.read())
+ctx.eval(lib())
 
 
 templates = env.list_templates()
 
+def test_extension():
+    js = env.generate_js('{{a}}')
+    ex = ctx.eval('(new (%s))'%js).render({"a":"test"})
+    assert ex == "test"
+
+def test_extensiontag():
+    template = '''{% jinja2js %}{% macro x(s) %}{{s}}{% endmacro %}{% endjinja2js %}'''
+    t = env.from_string(template)
+    js = str(t.render())
+    print js
+    ex = ctx.eval('(new (%s))'%js).module().x("test")
+    assert ex == "test"
 # templates = ['include.tmpl','partials/include.tmpl']
 # templates = ['extends.tmpl','partials/layout.tmpl']
 for f in templates:
     # filename = TEMPLATE_FOLDER+f
     template_string, filename, _ = env.loader.get_source(env,f)
-    code = generate(template_string, f)
+    code = generate(env, template_string, f)
     # print code
     ctx.eval(code)
 
@@ -50,35 +61,14 @@ context = {'context':True}
 
 
 def compare_templates(f):
-    print '*'*30
-    print f
-    print '*'*30
-    try:
-        jinja_template = env.get_template(f).render(context)
-        js_template = ctx.locals.Jinja2.get(f)
-        js_template_rendered = js_template.render(context)
-        assert jinja_template == js_template_rendered
-        print 'Jinja:\n'
-        print '_'*30
-        print jinja_template
-        print '='*30
-        print 'Js:\n'
-        print '_'*30
-        print js_template_rendered
-    except AssertionError,e:
-        print 'Jinja:\n',jinja_template
-        print 'Js:\n',js_template_rendered
-        raise e
-    except Exception, e:
-        print js_template
-        raise e
-    else:
-        print '-'*30
-        print 'PASS'
-        print '-'*30
-        print '\n'
+    jinja_template = env.get_template(f).render(context)
+    js_template = ctx.locals.Jinja2.getTemplate(f)
+    js_template_rendered = js_template.render(context)
+    print 'JS TEMPLATE:\n',js_template
+    print 'Jinja:\n',jinja_template
+    print 'Js:\n',js_template_rendered
+    assert jinja_template == js_template_rendered
 
-@with_setup(setup_func, teardown_func)
 def test_case_generator():
     for f in templates:
         yield compare_templates, f
