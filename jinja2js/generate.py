@@ -23,6 +23,6 @@ def generate_template():
     print generate(env, source,filename)
 
 def lib(minified=False):
-    runtime = os.path.join(os.path.dirname(__file__),"./lib/runtime.js" if minified else "./lib/runtime.min.js")
+    runtime = os.path.join(os.path.dirname(__file__),"./lib/runtime.min.js" if minified else "./lib/runtime.js")
     with open(runtime, 'r') as f:
         return f.read()

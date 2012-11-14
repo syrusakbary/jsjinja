@@ -3,10 +3,10 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
 `
 root = exports ? this
 
-new_context = (environment, template_name, blocks, vars, shared, globals, locals) ->
+new_context = (template_name, blocks, vars, shared, globals, locals) ->
   vars = vars or {}
   parent = (if shared then vars else globals)
-  new Context(environment, parent, template_name, blocks)
+  new Context(parent, template_name, blocks)
 
 class Set
   add: (o) ->
@@ -15,28 +15,31 @@ class Set
     delete @[o]
 
 class Template
-  constructor: (@environment) ->
-  
+  constructor: ->
+    @blocks = {}
+    for key of @
+      @blocks[key.slice(6)] = this[key] if key.indexOf('block_')==0
+
   root: ->
   
   render: (obj) ->
-    context = new Context(@environment, null, null, @blocks)
+    context = new Context(null, null, @blocks)
     context.vars = obj
     @root context
   
   module: ->
-    context = new Context(@environment)
+    context = new Context 
     @root context
     module = {}
-    for key in context.exported_vars
+    for key of context.exported_vars
       module[key] = context.vars[key]
     module
   
   new_context: (vars, shared, locals) ->
-    new_context @environment, @name, @blocks, vars, shared, @globals, locals
+    new_context @name, @blocks, vars, shared, @globals, locals
 
 class Context
-  constructor: (@environment, @parent, name, blocks) ->
+  constructor: (@parent, name, blocks) ->
       @vars = {}
       @blocks = {}
       for block_name of blocks
@@ -72,7 +75,7 @@ Jinja2 =
   registerTemplate: (name, template) ->
     @templates[name] = template
 
-  getTemplate: (name) ->
+  getTemplate: (name, from) ->
     new @templates[name]
 
   utils:

@@ -8,11 +8,11 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
-  new_context = function(environment, template_name, blocks, vars, shared, globals, locals) {
+  new_context = function(template_name, blocks, vars, shared, globals, locals) {
     var parent;
     vars = vars || {};
     parent = (shared ? vars : globals);
-    return new Context(environment, parent, template_name, blocks);
+    return new Context(parent, template_name, blocks);
   };
 
   Set = (function() {
@@ -33,34 +33,38 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
 
   Template = (function() {
 
-    function Template(environment) {
-      this.environment = environment;
+    function Template() {
+      var key;
+      this.blocks = {};
+      for (key in this) {
+        if (key.indexOf('block_') === 0) {
+          this.blocks[key.slice(6)] = this[key];
+        }
+      }
     }
 
     Template.prototype.root = function() {};
 
     Template.prototype.render = function(obj) {
       var context;
-      context = new Context(this.environment, null, null, this.blocks);
+      context = new Context(null, null, this.blocks);
       context.vars = obj;
       return this.root(context);
     };
 
     Template.prototype.module = function() {
-      var context, key, module, _i, _len, _ref;
-      context = new Context(this.environment);
+      var context, key, module;
+      context = new Context;
       this.root(context);
       module = {};
-      _ref = context.exported_vars;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        key = _ref[_i];
+      for (key in context.exported_vars) {
         module[key] = context.vars[key];
       }
       return module;
     };
 
     Template.prototype.new_context = function(vars, shared, locals) {
-      return new_context(this.environment, this.name, this.blocks, vars, shared, this.globals, locals);
+      return new_context(this.name, this.blocks, vars, shared, this.globals, locals);
     };
 
     return Template;
@@ -69,9 +73,8 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
 
   Context = (function() {
 
-    function Context(environment, parent, name, blocks) {
+    function Context(parent, name, blocks) {
       var block_name;
-      this.environment = environment;
       this.parent = parent;
       this.vars = {};
       this.blocks = {};
@@ -118,7 +121,7 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
     registerTemplate: function(name, template) {
       return this.templates[name] = template;
     },
-    getTemplate: function(name) {
+    getTemplate: function(name, from) {
       return new this.templates[name];
     },
     utils: {

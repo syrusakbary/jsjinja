@@ -9,7 +9,7 @@ printOutput = (process) ->
 
 watchJS = ->
   coffee = exec 'coffee -c -o ./jinja2js/lib/ ./jinja2js/src/'
-  closure = Closure.compile null, js:'./jinja2js/lib/runtime.js', js_output_file:'./jinja2js/lib/runtime.min.js', ->
+  # closure = Closure.compile null, js:'./jinja2js/lib/runtime.js', js_output_file:'./jinja2js/lib/runtime.min.js', ->
   printOutput(coffee)
 
 
