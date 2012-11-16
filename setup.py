@@ -29,7 +29,7 @@ setup(
     keywords='jinja2 javascript converter',
     include_package_data=True,
     entry_points={
-        'console_scripts' : ['jinja2js = jinja2js.generate:generate_template',]
+        'console_scripts' : ['jinja2js = jinja2js:generate_template',]
     },
     install_requires = parse_requirements('requirements.txt'),
     dependency_links = parse_dependency_links('requirements.txt'),

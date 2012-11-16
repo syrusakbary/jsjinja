@@ -5,3 +5,10 @@
 		{{loop.index}}{{a}}={{b}}
 	{% endfor %}
 {% endfor %}
+{% for a in x %}
+Second loop - {{ loop.cycle('odd', 'even') }}
+{% endfor %}
+{% for x in range(10) %}
+{% else %}
+No loop
+{% endfor %}

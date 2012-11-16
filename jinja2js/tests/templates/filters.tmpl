@@ -1,3 +1,18 @@
-{% set s = 'aba baba' %}
-{{'aba baba'|capitalize}}
-{{s|capitalize}}
+{% set str = 'aba baba' %}
+{% set seq = [1] %}
+{% set seq_c = [1,2,3] %}
+{{str|capitalize}}
+{{str|title}}
+{{str|default('b')}}
+{#{str|upper}#}
+{#{str|lower}#}
+{{seq|random}}
+{{seq_c|first}}
+{{seq_c|last}}
+{% filter escape %}
+a
+<a>asdfasdf&amp;>|
+b
+c
+{% endfilter %}
+b

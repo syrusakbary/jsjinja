@@ -54,14 +54,14 @@ unoptimize_before_dead_code = bool(unoptimize_before_dead_code().func_closure)
 
 
 def generate(node, environment, name, filename, stream=None,
-             defer_init=False):
+             defer_init=False, env=None):
     """Generate the python source for a node tree."""
     # if not isinstance(node, nodes.Template):
     #     raise TypeError('Can\'t compile non template nodes')
     generator = CodeGenerator(environment, name, filename, stream, defer_init)
     # generator.visit(node)
     if isinstance(node, nodes.Template):
-        generator.visit(node)
+        generator.visit(node, environment=env)
     else:
         eval_ctx = EvalContext(environment, name)
         frame = Frame(eval_ctx)
@@ -443,23 +443,23 @@ class CodeGenerator(NodeVisitor):
     def buffer(self, frame):
         """Enable buffering for the frame from that point onwards."""
         frame.buffer = self.temporary_identifier()
-        self.writeline('var %s = [];' % frame.buffer)
+        self.writeline('var %s = "";' % frame.buffer)
 
     def return_buffer_contents(self, frame):
         """Return the buffer contents of the frame."""
         if frame.eval_ctx.volatile:
             self.writeline('if context.eval_ctx.autoescape ')
             self.indent()
-            self.writeline('return escape(%s.join(\'\'));' % frame.buffer)
+            self.writeline('return escape(%s);' % frame.buffer)
             self.outdent()
             self.writeline('else ')
             self.indent()
-            self.writeline('return %s.join(\'\');' % frame.buffer)
+            self.writeline('return %s;' % frame.buffer)
             self.outdent()
         elif frame.eval_ctx.autoescape:
-            self.writeline('return escape(%s.join(\'\'));' % frame.buffer)
+            self.writeline('return escape(%s);' % frame.buffer)
         else:
-            self.writeline('return %s.join(\'\');' % frame.buffer)
+            self.writeline('return %s;' % frame.buffer)
 
     def indent(self):
         """Indent by one."""
@@ -477,7 +477,7 @@ class CodeGenerator(NodeVisitor):
         if frame.buffer is None:
             self.writeline('buf += ', node)
         else:
-            self.writeline('%s.append(' % frame.buffer, node)
+            self.writeline('%s += (' % frame.buffer, node)
 
     def end_write(self, frame):
         """End the writing process started by `start_write`."""
@@ -789,7 +789,7 @@ class CodeGenerator(NodeVisitor):
         self.writeline('return buf;')
     # -- Statement Visitors
 
-    def visit_Template(self, node, frame=None):
+    def visit_Template(self, node, frame=None, environment=None):
         assert frame is None, 'no root frame allowed'
         eval_ctx = EvalContext(self.environment, self.name)
         # if not unoptimize_before_dead_code:
@@ -884,7 +884,7 @@ class CodeGenerator(NodeVisitor):
 
         self.writeline('return Template;')
         self.outdent()
-        self.write(')(Jinja2)')
+        self.write(')(%s)'%environment)
         # self.writeline('blocks = {%s}' % ', '.join('%r: block_%s' % (x, x)
         #                                            for x in self.blocks),
         #                extra=1)
@@ -1309,12 +1309,12 @@ class CodeGenerator(NodeVisitor):
                     if frame.buffer is None:
                         self.writeline('buf += %r;'% val)
                     else:
-                        self.writeline('%s.push(%r);'%(frame.buffer,val))
+                        self.writeline('%s += %r;'%(frame.buffer,val))
                 else:
                     if frame.buffer is None:
                         self.writeline('buf += ', item)
                     else:
-                        self.writeline('%s.push('%frame.buffer, item)
+                        self.writeline('%s += ('%frame.buffer, item)
                     close = 1
                     if frame.eval_ctx.volatile:
                         self.write('(context.eval_ctx.autoescape and'
@@ -1543,11 +1543,12 @@ class CodeGenerator(NodeVisitor):
             self.visit(node.step, frame)
 
     def visit_Filter(self, node, frame):
-        self.write(self.filters[node.name] + '(')
+        self.write('context.callfilter(%s, ['%self.filters[node.name])
         func = self.environment.filters.get(node.name)
         if func is None:
             self.fail('no filter named %r' % node.name, node.lineno)
         if getattr(func, 'contextfilter', False):
+            node.args.prepend('context')
             self.write('context, ')
         elif getattr(func, 'evalcontextfilter', False):
             self.write('context.eval_ctx, ')
@@ -1560,12 +1561,13 @@ class CodeGenerator(NodeVisitor):
             self.visit(node.node, frame)
         elif frame.eval_ctx.volatile:
             self.write('(context.eval_ctx.autoescape and'
-                       ' escape(concat(%s)) or concat(%s))' %
+                       ' escape(%s) or %s)' %
                        (frame.buffer, frame.buffer))
         elif frame.eval_ctx.autoescape:
-            self.write('escape(concat(%s))' % frame.buffer)
+            self.write('escape(%s)' % frame.buffer)
         else:
-            self.write('concat(%s)' % frame.buffer)
+            self.write(frame.buffer)
+        self.write(']')
         self.signature(node, frame)
         self.write(')')
 

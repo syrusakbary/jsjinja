@@ -1,11 +1,8 @@
 #encoding: utf8
 import os
-# import sys
-# path = os.path.abspath(os.path.join(os.path.dirname(__file__),"../../"))
-# sys.path.append(path)
 import jinja2
 import jinja2js
-from jinja2js.generate import generate, lib
+
 from nose import with_setup
 
 
@@ -31,13 +28,13 @@ class Global(PyV8.JSClass):
 ctx = PyV8.JSContext(Global())
 ctx.enter()
 
-ctx.eval(lib())
+ctx.eval(jinja2js.lib())
 
 
-templates = env.list_templates()
+# templates = env.list_templates()
 
 def test_extension():
-    js = env.generate_js('{{a}}')
+    js = env.jinja2js.generate_source(source='{{a}}')
     ex = ctx.eval('(new (%s))'%js).render({"a":"test"})
     assert ex == "test"
 
@@ -48,20 +45,17 @@ def test_extensiontag():
     print js
     ex = ctx.eval('(new (%s))'%js).module().x("test")
     assert ex == "test"
-# templates = ['include.tmpl','partials/include.tmpl']
-# templates = ['extends.tmpl','partials/layout.tmpl']
-for f in templates:
-    # filename = TEMPLATE_FOLDER+f
-    template_string, filename, _ = env.loader.get_source(env,f)
-    code = generate(env, template_string, f)
-    # print code
-    ctx.eval(code)
+
+code = env.jinja2js.generate_all()
+# raise Exception(code) 
+ctx.eval(code)
 
 context = {'context':True}
 
 
 def compare_templates(f):
     jinja_template = env.get_template(f).render(context)
+    # raise Exception(ctx.locals.Jinja2.templates[f])
     js_template = ctx.locals.Jinja2.getTemplate(f)
     js_template_rendered = js_template.render(context)
     print 'JS TEMPLATE:\n',js_template
@@ -70,6 +64,7 @@ def compare_templates(f):
     assert jinja_template == js_template_rendered
 
 def test_case_generator():
+    templates = env.list_templates()
     for f in templates:
         yield compare_templates, f
 

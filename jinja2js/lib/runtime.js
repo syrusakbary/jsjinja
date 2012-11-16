@@ -33,8 +33,9 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
 
   Template = (function() {
 
-    function Template() {
+    function Template(environment) {
       var key;
+      this.environment = environment;
       this.blocks = {};
       for (key in this) {
         if (key.indexOf('block_') === 0) {
@@ -47,14 +48,14 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
 
     Template.prototype.render = function(obj) {
       var context;
-      context = new Context(null, null, this.blocks);
+      context = new this.environment.Context(this.environment, null, null, this.blocks);
       context.vars = obj;
       return this.root(context);
     };
 
     Template.prototype.module = function() {
       var context, key, module;
-      context = new Context;
+      context = new this.environment.Context(this.environment);
       this.root(context);
       module = {};
       for (key in context.exported_vars) {
@@ -73,8 +74,9 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
 
   Context = (function() {
 
-    function Context(parent, name, blocks) {
+    function Context(environment, parent, name, blocks) {
       var block_name;
+      this.environment = environment;
       this.parent = parent;
       this.vars = {};
       this.blocks = {};
@@ -93,12 +95,24 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
 
     Context.prototype.resolve = function(key) {
       var _ref;
-      return this.vars[key] || ((_ref = this.parent) != null ? _ref.resolve(key) : void 0);
+      return this.vars[key] || ((_ref = this.parent) != null ? _ref.resolve(key) : void 0) || this.environment.globals[key];
     };
 
     Context.prototype.call = function(f, args, kwargs) {
+      var arg, call_args, _ref;
+      if (!f) {
+        return;
+      }
+      call_args = !f.__args__ ? args : [];
+      for (arg in f.__args__) {
+        call_args.push(kwargs[(_ref = f.__args__) != null ? _ref[arg] : void 0] || args.pop());
+      }
+      return f.apply(null, call_args);
+    };
+
+    Context.prototype.callfilter = function(f, preargs, args, kwargs) {
       var arg, call_args;
-      call_args = [];
+      call_args = preargs;
       for (arg in f.__args__) {
         call_args.push(kwargs[f.__args__[arg]] || args.pop());
       }
@@ -112,6 +126,7 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
   Jinja2 = {
     templates: {},
     filters: {},
+    globals: {},
     registerFilter: function(name, func) {
       return this.filters[name] = func;
     },
@@ -141,7 +156,10 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
           index0: i,
           revindex: len - i,
           revindex0: len - i - 1,
-          length: len
+          length: len,
+          cycle: function() {
+            return arguments[i % arguments.length];
+          }
         };
       }
     },
@@ -155,7 +173,82 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
   });
 
   Jinja2.registerFilter('escape', function(html) {
-    return String(html).replace(/&(?!(\w+|\#\d+);)/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return String(html).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  });
+
+  Jinja2.registerFilter('default', function(value, default_value, boolean) {
+    if ((boolean && !value) || (value === void 0)) {
+      return default_value;
+    } else {
+      return value;
+    }
+  });
+
+  Jinja2.registerFilter('truncate', function(str, length, killwords, end) {
+    length || (length = 255);
+    end || (end = '...');
+    if (str.length <= length) {
+      return str;
+    } else if (killwords) {
+      return str.substring(0, length);
+    } else {
+      str = str.substring(0, maxLength + 1);
+      str = str.substring(0, Math.min(str.length, str.lastIndexOf(" ")));
+      return str + end;
+    }
+  });
+
+  Jinja2.registerFilter('length', function(obj) {
+    return obj.length;
+  });
+
+  Jinja2.registerFilter('count', function(obj) {
+    return obj.length;
+  });
+
+  Jinja2.registerFilter('indent', function(str, width, indentfirst) {
+    var indention;
+    width || (width = 4);
+    indention = width ? Array(width + 1).join(" ") : "";
+    return (indentfirst ? str : str.replace(/\n$/, '')).replace(/\n/g, "\n" + indention);
+  });
+
+  Jinja2.registerFilter('random', function(environment, seq) {
+    if (seq) {
+      return seq[Math.floor(Math.random() * seq.length)];
+    } else {
+      return undefined;
+    }
+  });
+
+  Jinja2.registerFilter('last', function(environment, seq) {
+    if (seq) {
+      return seq[seq.length - 1];
+    } else {
+      return undefined;
+    }
+  });
+
+  Jinja2.registerFilter('first', function(environment, seq) {
+    if (seq) {
+      return seq[0];
+    } else {
+      return undefined;
+    }
+  });
+
+  Jinja2.registerFilter('title', function(str) {
+    return str.replace(/\w\S*/g, function(txt) {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+  });
+
+  Jinja2.registerFilter('lower', function(str) {
+    return str.toLowerCase();
+  });
+
+  Jinja2.registerFilter('upper', function(str) {
+    return str.toUpperCase();
   });
 
   root.Jinja2 = Jinja2;
