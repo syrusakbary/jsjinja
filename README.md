@@ -77,21 +77,17 @@ And here is the javascript compiled template:
 	})()
 
 
-For using it you just have to do
-
-	Jinja2.get(""readme_template.tmpl").render({})
-
 # Installation
 
 For begin using Jinja2Js, you have to add `jinja2js.ext.Jinja2JsExtension` to your Jinja2 Environment extensions.
 
 Example:
 
-	your_jinja_env.add_extension('jinja2js.ext.Jinja2JsExtension')
+	env = jinja2.Environment(extensions=['jinja2js.ext.Jinja2JsExtension',])
 
 Or:
 
-	env = jinja2.Environment(extensions=['jinja2js.ext.Jinja2JsExtension',])
+	your_jinja_env.add_extension('jinja2js.ext.Jinja2JsExtension')
 
 
 # Usage
@@ -121,5 +117,5 @@ After you have included `runtime.js` and the generated js templates, then
 
 	context = {}
 	html = Jinja2.get(""readme_template.tmpl").render(context)
-	do_something_with(html)
+	$('body').html(html)
 
