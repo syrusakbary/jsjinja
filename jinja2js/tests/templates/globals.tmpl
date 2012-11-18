@@ -1,0 +1,9 @@
+{% set d = dict(a='b',c='d') %}
+{{d.a}}{{d['c']}}
+{% set pipe = joiner("|") %}
+{{pipe()}}a{{pipe()}}b
+
+{% set row_class = cycler('odd', 'even') %}
+{% for folder in range(10) %}
+	{{ row_class.next() }}
+{% endfor %}

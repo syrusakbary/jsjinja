@@ -8,7 +8,7 @@ printOutput = (process) ->
   process.stderr.on 'data', (data) -> sys.print data
 
 watchJS = ->
-  coffee = exec 'coffee -c -o ./jinja2js/lib/ ./jinja2js/src/'
+  coffee = exec 'coffee -cj ./jinja2js/lib/runtime.js ./jinja2js/src/runtime.coffee ./jinja2js/src/globals.coffee ./jinja2js/src/filters.coffee ./jinja2js/src/tests.coffee '
   # closure = Closure.compile null, js:'./jinja2js/lib/runtime.js', js_output_file:'./jinja2js/lib/runtime.min.js', ->
   printOutput(coffee)
 

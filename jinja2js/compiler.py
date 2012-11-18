@@ -605,7 +605,7 @@ class CodeGenerator(NodeVisitor):
             for name in getattr(visitor, dependency):
                 if name not in mapping:
                     mapping[name] = self.temporary_identifier()
-                self.writeline('%s = environment.%s[%r]' %
+                self.writeline('%s = Jinja2.%s[%r]' %
                                (mapping[name], dependency, JSVar(name)))
 
     def unoptimize_scope(self, frame):
@@ -797,7 +797,7 @@ class CodeGenerator(NodeVisitor):
 
         # if we want a deferred initialization we cannot move the
         # environment into a local name
-        envenv = not self.defer_init and ', environment' or ''
+        envenv = not self.defer_init and ', Jinja2' or ''
 
         # do we have an extends tag at all?  If not, we can save some
         # overhead by just not processing any inheritance code.
@@ -822,11 +822,11 @@ class CodeGenerator(NodeVisitor):
                     self.writeline('import %s as %s' % (imp, alias))
 
         # add the load name
-        self.writeline('(function(environment) ')
+        self.writeline('(function() ')
         self.indent()
-        self.writeline('environment.extends(Template, environment.Template);' % JSVar(self.name))
+        self.writeline('Jinja2.extends(Template, Jinja2.Template);' % JSVar(self.name))
         if self.name:
-            self.writeline('environment.registerTemplate(%r, Template);' % JSVar(self.name))
+            self.writeline('Jinja2.registerTemplate(%r, Template);' % JSVar(self.name))
         self.writeline('function Template() {return Template.__super__.constructor.apply(this, arguments);};')
         # self.indent()
         # self.writeline('environment = environment;')
@@ -844,7 +844,7 @@ class CodeGenerator(NodeVisitor):
         #     self.writeline('var parent_template;')
         if 'self' in find_undeclared(node.body, ('self',)):
             frame.identifiers.add_special('self')
-            self.writeline('l_self = environment.TemplateReference(context)')
+            self.writeline('l_self = Jinja2.TemplateReference(context)')
         self.pull_locals(frame)
         self.pull_dependencies(node.body)
         self.blockvisit(node.body, frame)
@@ -870,7 +870,7 @@ class CodeGenerator(NodeVisitor):
             undeclared = find_undeclared(block.body, ('self', 'super'))
             if 'self' in undeclared:
                 block_frame.identifiers.add_special('self')
-                self.writeline('var l_self = environment.TemplateReference(context)')
+                self.writeline('var l_self = Jinja2.TemplateReference(context)')
             if 'super' in undeclared:
                 block_frame.identifiers.add_special('super')
                 # self.writeline('log(context);')
@@ -884,7 +884,7 @@ class CodeGenerator(NodeVisitor):
 
         self.writeline('return Template;')
         self.outdent()
-        self.write(')(%s)'%environment)
+        self.write(')()')
         # self.writeline('blocks = {%s}' % ', '.join('%r: block_%s' % (x, x)
         #                                            for x in self.blocks),
         #                extra=1)
@@ -906,7 +906,7 @@ class CodeGenerator(NodeVisitor):
                 self.indent()
                 level += 1
         context = node.scoped and 'context.derived(locals())' or 'context'
-        self.writeline('buf += context.blocks[%r][0](%s,environment);' % (
+        self.writeline('buf += context.blocks[%r][0](%s);' % (
                        node.name, context), node)
 
     def visit_Extends(self, node, frame):
@@ -936,7 +936,7 @@ class CodeGenerator(NodeVisitor):
             if self.has_known_extends:
                 raise CompilerExit()
 
-        self.writeline('var parent_template = environment.getTemplate(', node)
+        self.writeline('var parent_template = Jinja2.getTemplate(', node)
         self.visit(node.template, frame)
         self.write(', %r);' % JSVar(self.name))
         self.writeline('for (name in parent_template.blocks) ')
@@ -972,7 +972,7 @@ class CodeGenerator(NodeVisitor):
         elif isinstance(node.template, (nodes.Tuple, nodes.List)):
             func_name = 'selectTemplate'
 
-        self.writeline('template = environment.%s(' % func_name, node)
+        self.writeline('template = Jinja2.%s(' % func_name, node)
         self.visit(node.template, frame)
         self.write(', %r)' % JSVar(self.name))
         if node.ignore_missing:
@@ -1001,30 +1001,30 @@ class CodeGenerator(NodeVisitor):
         if node.with_context:
             self.unoptimize_scope(frame)
         self.writeline('var l_%s = ' % node.target, node)
-        self.write(';')
+        # self.write(';')
         if frame.toplevel:
             self.write('context.vars[%r] = ' % node.target)
-        self.write('environment.getTemplate(')
+        self.write('Jinja2.getTemplate(')
         self.visit(node.template, frame)
         self.write(', %r).' % self.name)
         if node.with_context:
             self.write('make_module(context.parent, True, locals())')
         else:
-            self.write('module')
+            self.write('module()')
         if frame.toplevel and not node.target.startswith('_'):
-            self.writeline('context.exported_vars.discard(%r);' % node.target)
+            self.writeline('context.exported_vars.remove(%r);' % node.target)
         frame.assigned_names.add(node.target)
 
     def visit_FromImport(self, node, frame):
         """Visit named imports."""
         self.newline(node)
-        self.write(' var included_template = environment.getTemplate(')
+        self.write('var included_template = Jinja2.getTemplate(')
         self.visit(node.template, frame)
         self.write(', %r).' % self.name)
         if node.with_context:
             self.write('make_module(context.parent, True)')
         else:
-            self.write('module')
+            self.write('module()')
         self.write(';')
         var_names = []
         discarded_names = []
@@ -1033,11 +1033,11 @@ class CodeGenerator(NodeVisitor):
                 name, alias = name
             else:
                 alias = name
-            self.writeline('var l_%s = getattr(included_template, '
-                           '%r, missing)' % (alias, name))
-            self.writeline('if l_%s is missing:' % alias)
+            self.writeline('var l_%s = included_template['
+                           '%r]' % (alias, name))
+            self.writeline('if (typeof l_%s == "undefined")' % alias)
             self.indent()
-            self.writeline('l_%s = environment.undefined(%r %% '
+            self.writeline('l_%s = Jinja2.undefined(%r %% '
                            'included_template.__name__, '
                            'name=%r)' %
                            (alias, 'the template %%r (imported on %s) does '
@@ -1062,7 +1062,7 @@ class CodeGenerator(NodeVisitor):
                 ))
         if discarded_names:
             if len(discarded_names) == 1:
-                self.writeline('context.exported_vars.discard(%r);' %
+                self.writeline('context.exported_vars.remove(%r);' %
                                discarded_names[0])
             else:
                 self.writeline('context.exported_vars.difference_'
@@ -1118,7 +1118,7 @@ class CodeGenerator(NodeVisitor):
         # exists.
         if 'loop' not in aliases and 'loop' in find_undeclared(
            node.iter_child_nodes(only=('else_', 'test')), ('loop',)):
-            self.writeline("l_loop = environment.undefined(%r, name='loop')" %
+            self.writeline("l_loop = Jinja2.undefined(%r, name='loop')" %
                 ("'loop' is undefined. the filter section of a loop as well "
                  "as the else block don't have access to the special 'loop'"
                  " variable of the current loop.  Because there is no parent "
@@ -1172,7 +1172,7 @@ class CodeGenerator(NodeVisitor):
             self.writeline('l_%s = %s[%s];'%(loop_vars[0],var_ref,var_i))
         
         if extended_loop:
-            self.writeline('l_loop = environment.utils.loop(%s,%s);'%(var_i,var_len))
+            self.writeline('l_loop = Jinja2.utils.loop(%s,%s);'%(var_i,var_len))
         self.blockvisit(node.body, loop_frame)
         if node.else_:
             self.writeline('%s = 0;' % iteration_indicator)
@@ -1318,13 +1318,13 @@ class CodeGenerator(NodeVisitor):
                     close = 1
                     if frame.eval_ctx.volatile:
                         self.write('(context.eval_ctx.autoescape and'
-                                   ' escape or environment.utils.to_string)(')
+                                   ' escape or Jinja2.utils.to_string)(')
                     elif frame.eval_ctx.autoescape:
                         self.write('escape(')
                     else:
-                        self.write('environment.utils.to_string(')
+                        self.write('Jinja2.utils.to_string(')
                     if self.environment.finalize is not None:
-                        self.write('environment.finalize(')
+                        self.write('Jinja2.finalize(')
                         close += 1
                     self.visit(item, frame)
                     self.write(')' * close)
@@ -1349,7 +1349,7 @@ class CodeGenerator(NodeVisitor):
                     self.write('escape(')
                     close += 1
                 if self.environment.finalize is not None:
-                    self.write('environment.finalize(')
+                    self.write('Jinja2.finalize(')
                     close += 1
                 self.visit(argument, frame)
                 self.write(')' * close )
@@ -1450,7 +1450,7 @@ class CodeGenerator(NodeVisitor):
         def visitor(self, node, frame):
             if self.environment.sandboxed and \
                operator in self.environment.intercepted_binops:
-                self.write('environment.call_binop(context, %r, ' % operator)
+                self.write('Jinja2.call_binop(context, %r, ' % operator)
                 self.visit(node.left, frame)
                 self.write(', ')
                 self.visit(node.right, frame)
@@ -1466,7 +1466,7 @@ class CodeGenerator(NodeVisitor):
         def visitor(self, node, frame):
             if self.environment.sandboxed and \
                operator in self.environment.intercepted_unops:
-                self.write('environment.call_unop(context, %r, ' % operator)
+                self.write('Jinja2.call_unop(context, %r, ' % operator)
                 self.visit(node.node, frame)
             else:
                 self.write('(' + operator)
@@ -1520,17 +1520,17 @@ class CodeGenerator(NodeVisitor):
 
     def visit_Getitem(self, node, frame):
         # slices bypass the environment getitem method.
-        if isinstance(node.arg, nodes.Slice):
-            self.visit(node.node, frame)
-            self.write('[')
-            self.visit(node.arg, frame)
-            self.write(']')
-        else:
-            self.write('environment.getitem(')
-            self.visit(node.node, frame)
-            self.write(', ')
-            self.visit(node.arg, frame)
-            self.write(')')
+        # if isinstance(node.arg, nodes.Slice):
+        self.visit(node.node, frame)
+        self.write('[')
+        self.visit(node.arg, frame)
+        self.write(']')
+        # else:
+        #     self.write('Jinja2.getitem(')
+        #     self.visit(node.node, frame)
+        #     self.write(', ')
+        #     self.visit(node.arg, frame)
+        #     self.write(')')
 
     def visit_Slice(self, node, frame):
         if node.start is not None:
@@ -1553,7 +1553,7 @@ class CodeGenerator(NodeVisitor):
         elif getattr(func, 'evalcontextfilter', False):
             self.write('context.eval_ctx, ')
         elif getattr(func, 'environmentfilter', False):
-            self.write('environment, ')
+            self.write('Jinja2, ')
 
         # if the filter node is None we are inside a filter block
         # and want to write to the current buffer
@@ -1583,7 +1583,7 @@ class CodeGenerator(NodeVisitor):
         def write_expr2():
             if node.expr2 is not None:
                 return self.visit(node.expr2, frame)
-            self.write('environment.undefined(%r)' % ('the inline if-'
+            self.write('Jinja2.undefined(%r)' % ('the inline if-'
                        'expression on %s evaluated to false and '
                        'no else section was defined.' % self.position(node)))
 
@@ -1606,7 +1606,7 @@ class CodeGenerator(NodeVisitor):
 
     def visit_Call(self, node, frame, forward_caller=False):
         if self.environment.sandboxed:
-            self.write('environment.call(context, ')
+            self.write('Jinja2.call(context, ')
         else:
             self.write('context.call(')
         self.visit(node.node, frame)
@@ -1632,10 +1632,10 @@ class CodeGenerator(NodeVisitor):
         self.write(')')
 
     def visit_EnvironmentAttribute(self, node, frame):
-        self.write('environment.' + node.name)
+        self.write('Jinja2.' + node.name)
 
     def visit_ExtensionAttribute(self, node, frame):
-        self.write('environment.extensions[%r].%s' % (node.identifier, node.name))
+        self.write('Jinja2.extensions[%r].%s' % (node.identifier, node.name))
 
     def visit_ImportedName(self, node, frame):
         self.write(self.import_aliases[node.importname])

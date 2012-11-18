@@ -17,7 +17,7 @@ from pyv8 import PyV8
 
 TEMPLATE_FOLDER = 'templates/'
 env = jinja2.Environment(loader = jinja2.FileSystemLoader(TEMPLATE_FOLDER))
-env.add_extension('jinja2js.extension.Jinja2JsExtension')
+env.add_extension('jinja2js.ext.Jinja2JsExtension')
 
 class Global(PyV8.JSClass): 
   def log(self,*args):
