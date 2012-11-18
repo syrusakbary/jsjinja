@@ -1,10 +1,23 @@
-Jinja2Js: Use your Jinja2 Templates in Js
-=========================================
+Jinja2Js: Render Jinja2 Templates in JS
+=======================================
 
 Jinja2Js lets you use your [Jinja2](http://jinja.pocoo.org/) templates
 in Javascript. It **compile the Jinja2 templates to Javascript with 
-no restrictions**. The output can be included via script tags or can be added
-through the `{% jinja2js %}` tag to the templates.
+no restrictions**.
+
+The js can be generated via command line `jinja2js <template file>` or through the `{% jinja2js %}` tag in the templates.
+
+You can use:
+
+* Template inheritance (Include, Extends, Blocks, super, ...)
+* Import
+* Macros
+* Tests
+* Filters
+* Tags
+
+The only exception is that **you cannot use custom tags** like `{% customtag %}{% endcustomtag %}`.
+
 
 # Nutshell
 
@@ -67,20 +80,6 @@ And here is the javascript compiled template:
 For using it you just have to do
 
 	Jinja2.get(""readme_template.tmpl").render({})
-
-# Extra
-
-**All the Jinja2 templates can be translated into a javascript template**, with no restriction.
-You can use:
-
-* Template inheritance (Include, Extends, Blocks, super, ...)
-* Import
-* Macros
-* Tests
-* Filters
-* Tags
-
-The only exception is that **you cannot use custom tags** like `{% customtag %}{% endcustomtag %}`.
 
 # Installation
 
