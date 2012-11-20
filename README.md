@@ -113,10 +113,10 @@ Or just converting all
 print jinja_env.jinja2js.generate_all()
 ```
 
-Or using the command line script
+Or using the command line utility
 
 ```
-$> jinja2js yourtemplate.jinja2
+$> jinja2js <templatename>
 ```
 
 

@@ -35,7 +35,13 @@ def index():
 @app.route("/js",endpoint="render.js")
 def js():
     template_context_js = dict(template_context, js=True, other_url = url_for('render.python'))
-    return render_template("index.html",template_context= json.dumps(template_context_js))
+    
+    return '''<script src="templates.js"></script>
+<script>
+    html = Jinja2.getTemplate("layout.html").render(%s)
+    document.write(html)
+</script>
+''' %json.dumps(template_context_js)
 
 @app.route("/templates.js")
 def js_templates():
