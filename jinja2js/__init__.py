@@ -2,6 +2,16 @@ import jinja2
 import os
 from .compiler import generate
 
+_lib_js = {}
+
+def lib(minified=False):
+    global _lib_js
+    key = "minified" if minified else "normal"
+    if key not in _lib_js:
+        runtime = os.path.join(os.path.dirname(__file__),"lib/jinja2.runtime.min.js" if minified else "lib/jinja2.runtime.js")
+        _lib_js[key] = open(runtime,'r').read()
+    return _lib_js[key]
+
 class Jinja2Js (object):
     js_environment = 'Jinja2'
     def __init__(self,environment=None):
@@ -25,10 +35,7 @@ class Jinja2Js (object):
     def generate_source(self,source,name=None):
         return self._generate(source,name)
 
-def lib(minified=False):
-    runtime = os.path.join(os.path.dirname(__file__),"./lib/runtime.min.js" if minified else "./lib/runtime.js")
-    with open(runtime, 'r') as f:
-        return f.read()
+    lib = staticmethod(lib)
 
 def generate_template():
     from optparse import OptionParser

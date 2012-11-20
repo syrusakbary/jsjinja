@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+  {{ super() }}
+  <p>Total sites: {{sites|count}}</p>
+  <ul>
+    {% for site in sites %}
+    <li><a href="{{ site.url }}">{{ site.name }}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

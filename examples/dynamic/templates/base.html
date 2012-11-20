@@ -1,0 +1,9 @@
+{% block content %}
+  <h1>
+  {% if js %}
+  	Rendered with Javascript. <a href="{{other_url}}">View Python version</a>
+  {% else %}
+  	Rendered with Python. <a href="{{other_url}}">View Javascript version</a>
+  {% endif %}
+  </h1>
+{% endblock %}

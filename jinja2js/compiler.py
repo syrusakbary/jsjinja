@@ -1338,7 +1338,7 @@ class CodeGenerator(NodeVisitor):
             for argument in body:
                 self.writeline('buf += ')
                 if isinstance(argument, list):
-                    self.write("'%s';"%concat(argument).replace('\n','\\n'))
+                    self.write("%r;"%JSVar(concat(argument)))
                     continue
                 close = 0
                 if frame.eval_ctx.volatile:

@@ -35,11 +35,13 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
   Template = (function() {
 
     function Template() {
-      var key;
+      var k, key;
       this.blocks = {};
       for (key in this) {
         if (key.indexOf('block_') === 0) {
-          this.blocks[key.slice(6)] = this[key];
+          k = key.slice(6);
+          this.blocks[k] = this[key];
+          this.blocks[k].__append_context__ = true;
         }
       }
     }
@@ -103,6 +105,9 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
         return;
       }
       call_args = !f.__args__ ? args : [];
+      if (f.__append_context__) {
+        call_args.push(this);
+      }
       if (f.__append_args__) {
         call_args.push(args);
       }

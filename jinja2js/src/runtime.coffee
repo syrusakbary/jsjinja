@@ -18,7 +18,10 @@ class Template
   constructor: ->
     @blocks = {}
     for key of @
-      @blocks[key.slice(6)] = this[key] if key.indexOf('block_')==0
+      if key.indexOf('block_')==0
+        k = key.slice(6)
+        @blocks[k] = this[key] 
+        @blocks[k].__append_context__ = true
 
   root: ->
   
@@ -56,6 +59,8 @@ class Context
   call: (f, args, kwargs) ->
       return if not f
       call_args = if not f.__args__ then args else []
+      if f.__append_context__
+        call_args.push(@)
       if f.__append_args__
         call_args.push(args)
       if f.__append_kwargs__

@@ -104,13 +104,13 @@ jinja_env.add_extension('jinja2js.ext.Jinja2JsExtension')
 Once you have the Jinja2Js extension installed, you have to generate the js templates:
 
 ```python
-	print jinja_env.jinja2js.generate('your_template.jinja2')
+print jinja_env.jinja2js.generate('your_template.jinja2')
 ```
 
 Or just converting all
 
 ```python
-	print jinja_env.jinja2js.generate_all()
+print jinja_env.jinja2js.generate_all()
 ```
 
 Or using the command line script
@@ -122,15 +122,15 @@ $> jinja2js yourtemplate.jinja2
 
 ## Rendering the js templates
 
-For start using the templates you must include the `runtime.js` script:
+For start using the templates you must include the `jinja2.runtime.js` script:
 
 ```html
-	<script src="https://raw.github.com/SyrusAkbary/jinja2js/master/jinja2js/lib/runtime.min.js">
+<script src="https://raw.github.com/SyrusAkbary/jinja2js/master/jinja2js/lib/jinja2.runtime.min.js"></script>
 ```
 
-After you have included `runtime.js` and the generated js templates, then
+After you have included `jinja2.runtime.js` and the generated js templates, then
 
 ```js
-	html = Jinja2.get(""readme_template.tmpl").render({}})
-	$('body').html(html)
+html = Jinja2.getTemplate("template.html").render({}})
+$('body').html(html)
 ```
