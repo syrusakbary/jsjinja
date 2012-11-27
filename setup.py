@@ -33,7 +33,7 @@ setup(
     },
     install_requires = parse_requirements('requirements.txt'),
     dependency_links = parse_dependency_links('requirements.txt'),
-    setup_requires = ['nose>=1.0'],
+    # setup_requires = ['nose>=1.0'],
     tests_require = parse_requirements('requirements-test.txt'),
     # test_dirs='jsjinja/testsuite',
     test_suite = "nose.collector"
