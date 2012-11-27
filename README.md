@@ -18,6 +18,13 @@ You can use:
 
 The only exception is that **you cannot use custom tags** like `{% customtag %}{% endcustomtag %}`.
 
+## Installing
+
+First, you must do:
+
+```
+pip install jsjinja
+``` 
 
 # Nutshell
 
