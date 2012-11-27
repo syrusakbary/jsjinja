@@ -113,10 +113,10 @@ Or just converting all
 print jinja_env.jsjinja.generate_all()
 ```
 
-Or using the command line utility
+Or using the **command line utility**
 
 ```
-$> jsjinja <templates>
+jsjinja <templates>
 ```
 
 
@@ -135,10 +135,23 @@ html = Jinja2.getTemplate("template.html").render({}})
 $('body').html(html)
 ```
 
-## Tests
+# Examples
 
-You must have `pyv8` and `nose` python packages installed for running tests
+Library comes with a lot of examples, you can find them in [examples](https://github.com/SyrusAkbary/jsjinja/tree/master/examples/) directory.
+
+* [Static](https://github.com/SyrusAkbary/jsjinja/tree/master/examples/static)  generation
+* [Dynamic](https://github.com/SyrusAkbary/jsjinja/tree/master/examples/dynamic) generation
+
+
+# Testing
+
+You must have `pyv8` and `nose` python packages installed. You can do the tests with
 
 ```shell
 ./test.sh
 ```
+
+
+# TODOs and BUGS
+
+See: http://github.com/syrusakbary/jsjinja/issues
