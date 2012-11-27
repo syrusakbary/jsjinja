@@ -12,7 +12,7 @@ setup(
     download_url = 'git@github.com:syrusakbary/jsjinja.git',
     author='Syrus Akbary',
     author_email='me@syrusakbary.com',
-    description='Jinja2 to javascript compiler',
+    description='Jinja2 to Javascript compiler',
     # long_description=open('README').read(),
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
