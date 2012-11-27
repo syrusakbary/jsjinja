@@ -13,7 +13,7 @@ setup(
     author='Syrus Akbary',
     author_email='me@syrusakbary.com',
     description='Jinja2 to Javascript compiler',
-    # long_description=open('README').read(),
+    long_description=open('README.rst').read(),
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Console',
