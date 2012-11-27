@@ -24,7 +24,7 @@ Nutshell
 
 Here a small example of a Jinja template:
 
-::
+.. code:: html
 
     {% extends 'base.html' %}
     {% block title %}Memberlist{% endblock %}
@@ -38,7 +38,7 @@ Here a small example of a Jinja template:
 
 And here is the javascript compiled template:
 
-::
+.. code:: javascript
 
     (function() {
         Jinja2.extends(Template, Jinja2.Template);
@@ -89,14 +89,14 @@ your Jinja2 Environment.
 
 Example:
 
-::
+.. code:: python
 
     import jinja2
     env = jinja2.Environment(extensions=['jsjinja.ext.JsJinjaExtension',])
 
 Or:
 
-::
+.. code:: python
 
     jinja_env.add_extension('jsjinja.ext.JsJinjaExtension')
 
@@ -109,13 +109,13 @@ Generating js templates
 Once you have the JsJinja extension installed, you have to generate the
 js templates:
 
-::
+.. code:: python
 
     print jinja_env.jsjinja.generate('your_template.jinja2')
 
 Or just converting all
 
-::
+.. code:: python
 
     print jinja_env.jsjinja.generate_all()
 
@@ -131,14 +131,14 @@ Rendering the js templates
 For start using the templates you must include the ``jinja2.runtime.js``
 script:
 
-::
+.. code:: html
 
     <script src="https://raw.github.com/SyrusAkbary/jsjinja/master/jsjinja/lib/jinja2.runtime.min.js"></script>
 
 After you have included ``jinja2.runtime.js`` and the generated js
 templates, then
 
-::
+.. code:: javascript
 
     html = Jinja2.getTemplate("template.html").render({}})
     $('body').html(html)
