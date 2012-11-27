@@ -5,7 +5,7 @@ JsJinja lets you use your [Jinja2](http://jinja.pocoo.org/) templates
 in Javascript. It **compile the Jinja2 templates to Javascript with 
 no restrictions**.
 
-The js can be generated via command line `jinja2js <template file>` or through the `{% jinja2js %}` tag in the templates.
+The js can be generated via command line `jsjinja <template file>` or through the `{% jsjinja %}` tag in the templates.
 
 You can use:
 
@@ -82,19 +82,19 @@ And here is the javascript compiled template:
 
 # Installation
 
-For begin using JsJinja just add `jinja2js.ext.JsJinjaExtension` to your Jinja2 Environment.
+For begin using JsJinja just add `jsjinja.ext.JsJinjaExtension` to your Jinja2 Environment.
 
 Example:
 
 ```python
 import jinja2
-env = jinja2.Environment(extensions=['jinja2js.ext.JsJinjaExtension',])
+env = jinja2.Environment(extensions=['jsjinja.ext.JsJinjaExtension',])
 ```
 
 Or:
 
 ```python
-jinja_env.add_extension('jinja2js.ext.JsJinjaExtension')
+jinja_env.add_extension('jsjinja.ext.JsJinjaExtension')
 ```
 
 # Usage
@@ -104,19 +104,19 @@ jinja_env.add_extension('jinja2js.ext.JsJinjaExtension')
 Once you have the JsJinja extension installed, you have to generate the js templates:
 
 ```python
-print jinja_env.jinja2js.generate('your_template.jinja2')
+print jinja_env.jsjinja.generate('your_template.jinja2')
 ```
 
 Or just converting all
 
 ```python
-print jinja_env.jinja2js.generate_all()
+print jinja_env.jsjinja.generate_all()
 ```
 
 Or using the command line utility
 
 ```
-$> jinja2js <templatename>
+$> jsjinja <templatename>
 ```
 
 
@@ -125,7 +125,7 @@ $> jinja2js <templatename>
 For start using the templates you must include the `jinja2.runtime.js` script:
 
 ```html
-<script src="https://raw.github.com/SyrusAkbary/jinja2js/master/jinja2js/lib/jinja2.runtime.min.js"></script>
+<script src="https://raw.github.com/SyrusAkbary/jsjinja/master/jsjinja/lib/jinja2.runtime.min.js"></script>
 ```
 
 After you have included `jinja2.runtime.js` and the generated js templates, then
