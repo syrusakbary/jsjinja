@@ -3,7 +3,7 @@ import json
 
 app = Flask(__name__)
 
-app.jinja_env.add_extension('jinja2js.ext.Jinja2JsExtension')
+app.jinja_env.add_extension('jsjinja.ext.Jinja2JsExtension')
 app.jinja_env.autoescape = False
 app.debug = True
 
@@ -46,9 +46,9 @@ def js():
 @app.route("/templates.js")
 def js_templates():
     ret = '/* Jinja2 javascript runtime (minified) */\n'
-    ret += app.jinja_env.jinja2js.lib(minified=True)
+    ret += app.jinja_env.jsjinja.lib(minified=True)
     ret += '\n/* Js compiled templates */\n'
-    ret += app.jinja_env.jinja2js.generate_all()
+    ret += app.jinja_env.jsjinja.generate_all()
     return Response(response=ret, status=200, mimetype="text/javascript")
 
 @app.route("/python",endpoint="render.python")

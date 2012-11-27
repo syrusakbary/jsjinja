@@ -12,7 +12,7 @@ def lib(minified=False):
         _lib_js[key] = open(runtime,'r').read()
     return _lib_js[key]
 
-class Jinja2Js (object):
+class JsJinja (object):
     js_environment = 'Jinja2'
     def __init__(self,environment=None):
         self.environment = environment or jinja2.Environment()
@@ -39,7 +39,7 @@ class Jinja2Js (object):
 
 def generate_template():
     from optparse import OptionParser
-    j = Jinja2Js()
+    j = JsJinja()
 
     usage = "usage: %prog [options] file [output]"
     parser = OptionParser(usage)
@@ -48,5 +48,5 @@ def generate_template():
     source = open(filename).read()
     print j.generate_source(source, filename)
 
-# j = Jinja2Js()
+# j = jsjinja()
 # print j.generate('template.tmpl')

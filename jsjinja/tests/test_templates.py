@@ -1,7 +1,7 @@
 #encoding: utf8
 import os
 import jinja2
-import jinja2js
+import jsjinja
 
 from nose import with_setup
 
@@ -17,7 +17,7 @@ from pyv8 import PyV8
 
 TEMPLATE_FOLDER = 'templates/'
 env = jinja2.Environment(loader = jinja2.FileSystemLoader(TEMPLATE_FOLDER))
-env.add_extension('jinja2js.ext.Jinja2JsExtension')
+env.add_extension('jsjinja.ext.JsJinjaExtension')
 
 class Global(PyV8.JSClass): 
   def log(self,*args):
@@ -28,25 +28,25 @@ class Global(PyV8.JSClass):
 ctx = PyV8.JSContext(Global())
 ctx.enter()
 
-ctx.eval(jinja2js.lib())
+ctx.eval(jsjinja.lib())
 
 
 # templates = env.list_templates()
 
 def test_extension():
-    js = env.jinja2js.generate_source(source='{{a}}')
+    js = env.jsjinja.generate_source(source='{{a}}')
     ex = ctx.eval('(new (%s))'%js).render({"a":"test"})
     assert ex == "test"
 
 def test_extensiontag():
-    template = '''{% jinja2js %}{% macro x(s) %}{{s}}{% endmacro %}{% endjinja2js %}'''
+    template = '''{% jsjinja %}{% macro x(s) %}{{s}}{% endmacro %}{% endjsjinja %}'''
     t = env.from_string(template)
     js = str(t.render())
     print js
     ex = ctx.eval('(new (%s))'%js).module().x("test")
     assert ex == "test"
 
-code = env.jinja2js.generate_all()
+code = env.jsjinja.generate_all()
 # raise Exception(code) 
 ctx.eval(code)
 

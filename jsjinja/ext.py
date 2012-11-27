@@ -1,18 +1,18 @@
 from jinja2 import nodes
 from jinja2.ext import Extension
-from jinja2js import Jinja2Js
+from jsjinja import JsJinja
 # from generate import generate, generate_js, generate_node, generate_all_templates
 
-class Jinja2JsExtension(Extension):
+class JsJinjaExtension(Extension):
     # a set of names that trigger the extension.
-    tags = set(['jinja2js'])
+    tags = set(['jsjinja'])
 
     def __init__(self, environment):
-        super(Jinja2JsExtension, self).__init__(environment)
+        super(JsJinjaExtension, self).__init__(environment)
 
         # add the defaults to the environment
         environment.extend(
-            jinja2js=Jinja2Js(self.environment)
+            jsjinja=JsJinja(self.environment)
             # generate_js=self.generate_js,
             # generate_all_templates=self.generate_all_templates,
         )
@@ -29,9 +29,9 @@ class Jinja2JsExtension(Extension):
 
     def parse(self, parser):
         parser.stream.next().lineno # lineno = 
-        body = parser.parse_statements(['name:endjinja2js'], drop_needle=True)
+        body = parser.parse_statements(['name:endjsjinja'], drop_needle=True)
         node = nodes.Template(body,lineno=1)
-        code = self.environment.jinja2js.generate_node(node or body[0],None)
+        code = self.environment.jsjinja.generate_node(node or body[0],None)
         return nodes.Output([nodes.Const(code)]).set_lineno(1)
 
     # def a(self,*args,**kwargs):

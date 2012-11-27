@@ -1,7 +1,7 @@
-Jinja2Js: Render Jinja2 Templates in JS
+JsJinja: Render Jinja2 Templates in JS
 =======================================
 
-Jinja2Js lets you use your [Jinja2](http://jinja.pocoo.org/) templates
+JsJinja lets you use your [Jinja2](http://jinja.pocoo.org/) templates
 in Javascript. It **compile the Jinja2 templates to Javascript with 
 no restrictions**.
 
@@ -82,26 +82,26 @@ And here is the javascript compiled template:
 
 # Installation
 
-For begin using Jinja2Js just add `jinja2js.ext.Jinja2JsExtension` to your Jinja2 Environment.
+For begin using JsJinja just add `jinja2js.ext.JsJinjaExtension` to your Jinja2 Environment.
 
 Example:
 
 ```python
 import jinja2
-env = jinja2.Environment(extensions=['jinja2js.ext.Jinja2JsExtension',])
+env = jinja2.Environment(extensions=['jinja2js.ext.JsJinjaExtension',])
 ```
 
 Or:
 
 ```python
-jinja_env.add_extension('jinja2js.ext.Jinja2JsExtension')
+jinja_env.add_extension('jinja2js.ext.JsJinjaExtension')
 ```
 
 # Usage
 
 ## Generating js templates
 
-Once you have the Jinja2Js extension installed, you have to generate the js templates:
+Once you have the JsJinja extension installed, you have to generate the js templates:
 
 ```python
 print jinja_env.jinja2js.generate('your_template.jinja2')

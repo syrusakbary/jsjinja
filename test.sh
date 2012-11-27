@@ -1,2 +1,2 @@
 #!/bin/sh
-nosetests -w jinja2js/tests/ -v
+nosetests -w jsjinja/tests/ -v
