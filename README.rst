@@ -24,7 +24,7 @@ Nutshell
 
 Here a small example of a Jinja template:
 
-.. code:: html
+.. code:: html+django
 
     {% extends 'base.html' %}
     {% block title %}Memberlist{% endblock %}
