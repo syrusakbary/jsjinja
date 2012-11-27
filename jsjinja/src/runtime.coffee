@@ -80,6 +80,8 @@ class Context
 
 Jinja2 =
 
+  version: 0.2
+  
   templates: {}
   
   filters: {}

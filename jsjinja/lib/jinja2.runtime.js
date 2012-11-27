@@ -137,6 +137,7 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
   })();
 
   Jinja2 = {
+    version: 0.2,
     templates: {},
     filters: {},
     globals: {},
