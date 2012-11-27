@@ -13,7 +13,10 @@
         <div id="template-content">
         </div>
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-        <script src="https://raw.github.com/SyrusAkbary/jinja2js/master/jinja2js/lib/jinja2.runtime.min.js"></script>
+        <!--
+            Not included because is already in templates.js (because is generated with -l option which includes runtime lib)
+            <script src="https://raw.github.com/SyrusAkbary/jsjinja/master/jsjinja/lib/jinja2.runtime.min.js"></script>
+        -->
         <script src="templates.js"></script>
         <script>
             html = Jinja2.getTemplate("layout.html").render({

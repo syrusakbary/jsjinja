@@ -1,6 +1,8 @@
 import jinja2
 import os
 from .compiler import generate
+import glob
+import re
 
 _lib_js = {}
 
@@ -30,7 +32,7 @@ class JsJinja (object):
 
     def generate_all(self):
         templates = self.environment.list_templates()
-        return ';\n'.join(map(self.generate,templates))+';'
+        return ';'+';\n'.join(map(self.generate,templates))+';'
 
     def generate_source(self,source,name=None):
         return self._generate(source,name)
@@ -41,12 +43,38 @@ def generate_template():
     from optparse import OptionParser
     j = JsJinja()
 
-    usage = "usage: %prog [options] file [output]"
+    usage = "usage: %prog [options] files"
     parser = OptionParser(usage)
+    parser.add_option("-o", "--output", dest="output",default=None,
+                  help="write output to FILE", metavar="FILE")
+    parser.add_option("-b", "--base", dest="base",default=None,
+                  help="Set tempalte dir for dropping it in template name", metavar="FILE")
+    parser.add_option("-l", "--lib", dest="lib",default=False,
+                  help="Include Jinja2 runtime lib", action="store_true")
     (options, args) = parser.parse_args()
-    filename = args[0]
-    source = open(filename).read()
-    print j.generate_source(source, filename)
+
+    if not args:
+        raise Exception('You must specify input files')
+
+    files = []
+    for a in args:
+        files += glob.glob(a)
+
+    generated = [lib(True)] if options.lib else []
+    for f in files:
+        source = open(f).read()
+        if options.base:
+            f = re.sub('^'+options.base+'/?', '', f)
+        gen = j.generate_source(source, f)
+        generated.append(gen)
+
+    generated = ';'+';\n'.join(generated)+';'
+    output = options.output
+    if output:
+        with open(output,'w') as f:
+            f.write(generated)
+    else:
+        print generated
 
 # j = jsjinja()
 # print j.generate('template.tmpl')

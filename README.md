@@ -116,7 +116,7 @@ print jinja_env.jsjinja.generate_all()
 Or using the command line utility
 
 ```
-$> jsjinja <templatename>
+$> jsjinja <templates>
 ```
 
 
@@ -133,4 +133,12 @@ After you have included `jinja2.runtime.js` and the generated js templates, then
 ```js
 html = Jinja2.getTemplate("template.html").render({}})
 $('body').html(html)
+```
+
+## Tests
+
+You must have `pyv8` and `nose` python packages installed for running tests
+
+```shell
+./test.sh
 ```

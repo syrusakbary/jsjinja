@@ -822,11 +822,13 @@ class CodeGenerator(NodeVisitor):
                     self.writeline('import %s as %s' % (imp, alias))
 
         # add the load name
+        template_name = JSVar(self.name)
         self.writeline('(function() ')
         self.indent()
-        self.writeline('Jinja2.extends(Template, Jinja2.Template);' % JSVar(self.name))
+        self.writeline('/* %s */' % self.name)
+        self.writeline('Jinja2.extends(Template, Jinja2.Template);')
         if self.name:
-            self.writeline('Jinja2.registerTemplate(%r, Template);' % JSVar(self.name))
+            self.writeline('Jinja2.registerTemplate(%r, Template);' % template_name)
         self.writeline('function Template() {return Template.__super__.constructor.apply(this, arguments);};')
         # self.indent()
         # self.writeline('environment = environment;')
