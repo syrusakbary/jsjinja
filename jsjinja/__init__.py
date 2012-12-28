@@ -31,6 +31,8 @@ class JsJinja (object):
         return self.generate_node(node,name)
 
     def generate_all(self):
+        if not self.environment.loader:
+            raise Exception("The Jinja2 environment doesn't have a template loader associated.\nYou must specify it for using the generate_all method.")
         templates = self.environment.list_templates()
         return ';'+';\n'.join(map(self.generate,templates))+';'
 
