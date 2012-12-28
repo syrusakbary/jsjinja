@@ -7,7 +7,7 @@ from requirements_utils import parse_dependency_links, parse_requirements
 print find_packages()
 setup(
     name='jsjinja',
-    version='0.2',
+    version='0.2.1',
     url='https://github.com/syrusakbary/jsjinja',
     download_url = 'git@github.com:syrusakbary/jsjinja.git',
     author='Syrus Akbary',
