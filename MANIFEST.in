@@ -1,7 +1,3 @@
 include Makefile README.md README.rst
 recursive-include jsjinja/lib *
-<<<<<<< HEAD
 recursive-include jsjinja/tests *
-=======
-recursive-include jsjinja/tests *
->>>>>>> c32bd24f6b5d0173656337ce061c5d4c8c11a658
