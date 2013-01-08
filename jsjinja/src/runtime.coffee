@@ -30,6 +30,11 @@ class Template
     context.vars = obj
     @root context
   
+  render_block: (name, obj) ->
+    context = new Context(null, null, @blocks)
+    context.vars = obj
+    @["block_#{name}"] context
+  
   module: ->
     context = new Context
     @root context
@@ -114,6 +119,37 @@ Jinja2 =
 
     missing: `undefined`
 
+    format: (str,arr) ->
+      callback = (exp, p0, p1, p2, p3, p4) ->
+        return "%"  if exp is "%%"
+        return `undefined`  if arr[++i] is `undefined`
+        exp = (if p2 then parseInt(p2.substr(1)) else `undefined`)
+        base = (if p3 then parseInt(p3.substr(1)) else `undefined`)
+        val = undefined
+        switch p4
+          when "s"
+            val = arr[i]
+          when "c"
+            val = arr[i][0]
+          when "f"
+            val = parseFloat(arr[i]).toFixed(exp)
+          when "p"
+            val = parseFloat(arr[i]).toPrecision(exp)
+          when "e"
+            val = parseFloat(arr[i]).toExponential(exp)
+          when "x"
+            val = parseInt(arr[i]).toString((if base then base else 16))
+          when "d"
+            val = parseFloat(parseInt(arr[i], (if base then base else 10)).toPrecision(exp)).toFixed(0)
+        val = (if typeof (val) is "object" then JSON.stringify(val) else val.toString(base))
+        sz = parseInt(p1) # padding size
+        ch = (if p1 and p1[0] is "0" then "0" else " ") # isnull?
+        val = (if p0 isnt `undefined` then val + ch else ch + val)  while val.length < sz # isminus?
+        val
+      i = -1
+      regex = /%(-)?(0?[0-9]+)?([.][0-9]+)?([#][0-9]+)?([scfpexd])/g
+      str.replace regex, callback
+    
     loop: (i, len) ->
       first: i is 0
       last: i is (len - 1)

@@ -1480,8 +1480,21 @@ class CodeGenerator(NodeVisitor):
     visit_Sub = binop('-')
     visit_Mul = binop('*')
     visit_Div = binop('/')
-    visit_FloorDiv = binop('//')
-    visit_Pow = binop('**')
+    
+    def visit_FloorDiv(self, node, frame):
+        self.writer.write("Math.floor(")
+        self.visit(node.left, frame)
+        self.writer.write(" / ")
+        self.visit(node.right, frame)
+        self.writer.write(")")
+
+    def visit_Pow(self, node, frame):
+        self.writer.write("Math.pow(")
+        self.visit(node.left, frame)
+        self.writer.write(", ")
+        self.visit(node.right, frame)
+        self.writer.write(")")
+
     visit_Mod = binop('%')
     visit_And = binop('&&', interceptable=False)
     visit_Or = binop('||', interceptable=False)

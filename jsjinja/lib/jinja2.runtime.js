@@ -55,6 +55,13 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
       return this.root(context);
     };
 
+    Template.prototype.render_block = function(name, obj) {
+      var context;
+      context = new Context(null, null, this.blocks);
+      context.vars = obj;
+      return this["block_" + name](context);
+    };
+
     Template.prototype.module = function() {
       var context, key, module;
       context = new Context;
@@ -169,6 +176,53 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
         }
       },
       missing: undefined,
+      format: function(str, arr) {
+        var callback, i, regex;
+        callback = function(exp, p0, p1, p2, p3, p4) {
+          var base, ch, sz, val;
+          if (exp === "%%") {
+            return "%";
+          }
+          if (arr[++i] === undefined) {
+            return undefined;
+          }
+          exp = (p2 ? parseInt(p2.substr(1)) : undefined);
+          base = (p3 ? parseInt(p3.substr(1)) : undefined);
+          val = void 0;
+          switch (p4) {
+            case "s":
+              val = arr[i];
+              break;
+            case "c":
+              val = arr[i][0];
+              break;
+            case "f":
+              val = parseFloat(arr[i]).toFixed(exp);
+              break;
+            case "p":
+              val = parseFloat(arr[i]).toPrecision(exp);
+              break;
+            case "e":
+              val = parseFloat(arr[i]).toExponential(exp);
+              break;
+            case "x":
+              val = parseInt(arr[i]).toString((base ? base : 16));
+              break;
+            case "d":
+              val = parseFloat(parseInt(arr[i], (base ? base : 10)).toPrecision(exp)).toFixed(0);
+          }
+          val = (typeof val === "object" ? JSON.stringify(val) : val.toString(base));
+          sz = parseInt(p1);
+          ch = (p1 && p1[0] === "0" ? "0" : " ");
+          while (val.length < sz) {
+            val = (p0 !== undefined ? val + ch : ch + val);
+          }
+          return val;
+        };
+        i = -1;
+        regex = /%(-)?(0?[0-9]+)?([.][0-9]+)?([#][0-9]+)?([scfpexd])/g;
+        return str.replace(regex, callback);
+      },
       loop: function(i, len) {
         return {
           first: i === 0,
