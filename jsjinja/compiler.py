@@ -367,12 +367,15 @@ class CompilerExit(Exception):
     raises such an exception is not further processed.
     """
 
-import simplejson
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 class JSVar(object):
     def __init__(self,var): self.var = var
 
-    def __repr__(self): return simplejson.dumps(self.var)
+    def __repr__(self): return json.dumps(self.var)
     
 class CodeGenerator(NodeVisitor):
 
