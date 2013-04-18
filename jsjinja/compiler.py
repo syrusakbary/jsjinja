@@ -989,7 +989,8 @@ class CodeGenerator(NodeVisitor):
         if node.with_context:
             first = True
             self.writeline('var locals = {')
-            for l in frame.assigned_names:
+            names = list (frame.identifiers.declared) # + list(frame.assigned_names)
+            for l in names:
                 if not first: self.write(',')
                 self.write('%r:l_%s'%(JSVar(l),l))
                 first = False
