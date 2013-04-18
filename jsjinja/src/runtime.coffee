@@ -3,9 +3,28 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
 `
 root = exports ? this
 
+clone = (obj) ->
+  target = {}
+  for i of obj
+    target[i] = obj[i]  if obj.hasOwnProperty(i)
+  target
+
+merge_options = (obj1, obj2) ->
+  obj3 = {}
+  for attrname of obj1
+    obj3[attrname] = obj1[attrname]
+  for attrname of obj2
+    obj3[attrname] = obj2[attrname]
+  obj3
+
 new_context = (template_name, blocks, vars, shared, globals, locals) ->
   vars = vars or {}
-  parent = (if shared then vars else globals)
+  parent = (if shared then vars else merge_options(globals or {}, vars))
+  if locals
+    if shared
+      parent = clone(parent)
+    for attrname of locals
+      parent[attrname] = locals[attrname] if locals[attrname] isnt Jinja2.utils.missing
   new Context(parent, template_name, blocks)
 
 class Set
@@ -25,10 +44,11 @@ class Template
 
   root: ->
   
+  new_context: (vars, shared, locals) ->
+    new_context @name, @blocks, vars, !!shared, @globals, locals
+
   render: (obj) ->
-    context = new Context(null, null, @blocks)
-    context.vars = obj
-    @root context
+    @root @new_context(obj)
   
   render_block: (name, obj) ->
     context = new Context(null, null, @blocks)
@@ -59,7 +79,13 @@ class Context
       blocks[index]
 
   resolve: (key) ->
-      @vars[key] or @parent?.resolve(key) or Jinja2.globals[key]
+    if @vars?.hasOwnProperty(key)
+      return @vars[key]
+    if @parent?.resolve
+      return @parent.resolve(key)
+    if @parent?.hasOwnProperty(key)
+      return @parent[key]
+    return Jinja2.globals[key]
 
   call: (f, args, kwargs) ->
       return if not f

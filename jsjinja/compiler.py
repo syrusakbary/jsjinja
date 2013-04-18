@@ -987,7 +987,14 @@ class CodeGenerator(NodeVisitor):
             self.indent()
 
         if node.with_context:
-            self.simple_write('template.root(context)', frame)
+            first = True
+            self.writeline('var locals = {')
+            for l in frame.assigned_names:
+                if not first: self.write(',')
+                self.write('%r:l_%s'%(JSVar(l),l))
+                first = False
+            self.write('};')
+            self.simple_write('template.root(template.new_context(context.parent, true, locals))', frame)
             # self.writeline('for event in template.root_render_func('
             #                'template.new_context(context.parent, True, '
             #                'locals())):')
