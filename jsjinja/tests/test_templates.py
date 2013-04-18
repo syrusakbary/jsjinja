@@ -57,7 +57,7 @@ def compare_templates(f):
     jinja_template = env.get_template(f).render(context)
     # raise Exception(ctx.locals.Jinja2.templates[f])
     js_template = ctx.locals.Jinja2.getTemplate(f)
-    js_template_rendered = js_template.render(context)
+    js_template_rendered = unicode(js_template.render(context),'utf-8')
     print 'JS TEMPLATE:\n',js_template
     print 'Jinja:\n',jinja_template
     print 'Js:\n',js_template_rendered
