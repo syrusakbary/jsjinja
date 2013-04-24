@@ -552,20 +552,27 @@ class CodeGenerator(NodeVisitor):
 
         self.write(', [')
 
+        first = True
         for arg in node.args:
+            if not first: 
+                self.write(', ')
             self.visit(arg, frame)
-            self.write(', ')
+            if first: first = False
         self.write(']')
 
         if not kwarg_workaround:
             self.write(', {')
+            first = True
             for kwarg in node.kwargs:
+                if not first:
+                    self.write(', ')
                 self.visit(kwarg, frame)
-                self.write(', ')
+                if first: first = False
             self.write('}')
             if extra_kwargs is not None:
                 for key, value in extra_kwargs.iteritems():
                     self.write(', %s=%s' % (key, value))
+        
         if node.dyn_args:
             self.write(', *')
             self.visit(node.dyn_args, frame)
@@ -829,7 +836,7 @@ class CodeGenerator(NodeVisitor):
         self.writeline('(function() ')
         self.indent()
         self.writeline('/* %s */' % self.name)
-        self.writeline('Jinja2.extends(Template, Jinja2.Template);')
+        self.writeline('Jinja2.__extends(Template, Jinja2.Template);')
         if self.name:
             self.writeline('Jinja2.registerTemplate(%r, Template);' % template_name)
         self.writeline('function Template() {return Template.__super__.constructor.apply(this, arguments);};')

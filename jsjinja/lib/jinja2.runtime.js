@@ -280,7 +280,7 @@ __extends = function(child, parent) { for (var key in parent) { if (__hasProp.ca
         };
       }
     },
-    "extends": __extends,
+    "__extends": __extends,
     Template: Template,
     Context: Context
   };

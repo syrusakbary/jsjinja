@@ -185,7 +185,7 @@ Jinja2 =
       revindex0: len - i - 1
       length: len
       cycle: -> arguments[i%arguments.length]
-  extends: `__extends`
+  __extends: `__extends`
   Template: Template
   Context: Context
 
