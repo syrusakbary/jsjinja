@@ -15,7 +15,9 @@ from jinja2 import nodes
 from jinja2.nodes import EvalContext
 from jinja2.visitor import NodeVisitor
 from jinja2.exceptions import TemplateAssertionError
-from jinja2.utils import Markup, concat, escape, is_python_keyword, next
+from jinja2.utils import Markup, concat, escape
+from jinja2._compat import next
+from keyword import iskeyword as is_python_keyword
 
 operators = {
     'eq':       '==',
